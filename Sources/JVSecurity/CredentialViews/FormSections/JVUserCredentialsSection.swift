@@ -9,7 +9,8 @@
 import SwiftUI
 import JVUI
 
-/// A subview to enter an accountname and its password
+/// A Section-subview to enter a server and its port
+/// Meant to be used as part of a Form
 /// The view will notify any subscribers of any changes made
 /// - parameters: accountName: The accountName to store (often an @state variable of the superview)
 /// - parameters: password: The password to store (often an @state variable of the superview)
@@ -39,14 +40,10 @@ public struct UserCredentialsSection: View, SettingsView, Securable {
 					.frame(width: 100, alignment: .trailing)
 				TextField("", text: $userName,
 						  onCommit: {
-					print("Username onCommit: \(userName)")
 					onCommitMethod()
 					postNotification()
 				}
 				)
-				.onChange(of: userName) { newValue in
-					print("binding changed to: \(newValue)")
-				}
 				.frame(maxWidth: .infinity, alignment: .leading)
 			}
 			HStack {

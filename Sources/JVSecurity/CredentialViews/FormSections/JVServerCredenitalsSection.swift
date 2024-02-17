@@ -8,11 +8,13 @@
 import SwiftUI
 import JVUI
 
-/// A subview to enter a server and its port
+/// A Section-subview to enter a server and its port
+/// Meant to be used as part of a Form
 /// The view will notify any subscribers of any changes made
 /// - parameters: hostName: The hostName to store (often an @state variable of the superview)
 /// - parameters: portNumber: The portNumber to store (often an @state variable of the superview)
-///   when the portnumber is set to nil, it will not be shown!
+///   When the portnumber is set to nil, the corresponding field will not be shown!
+///   If it is set to zero or less, the corresponding field will be empty
 /// - Parameters: onCommitMethod: A method to be called when the user commits (often a callback method defined in the superview)
 /// - Parameters: notificationKey: The key that is used to notify the subscribers through the NotificationCenter
 public struct ServerCredentialsSection: View, SettingsView, Securable {
@@ -38,13 +40,7 @@ public struct ServerCredentialsSection: View, SettingsView, Securable {
 			HStack {
 				Text(String(localized: "Server", bundle: .module))
 					.frame(width: 100, alignment: .trailing)
-				TextField("", text: Binding(
-					get: { String(self.hostName) },
-					set: { newValue in
-						let digitsAndDotsOnly = newValue.filter { "0123456789.".contains($0) }
-						self.hostName = digitsAndDotsOnly
-					}
-				),
+				TextField("", text: $hostName,
 						  onCommit: { onCommitMethod(); postNotification() }
 				)
 				.frame(maxWidth: .infinity, alignment: .leading)
@@ -55,7 +51,7 @@ public struct ServerCredentialsSection: View, SettingsView, Securable {
 					Text(String(localized: "Port Number", bundle: .module))
 						.frame(width: 100, alignment: .trailing)
 					TextField("", text:Binding(
-						get: { String(self.portNumber!)  },
+						get: { self.portNumber! <= 0 ?  "" : String(self.portNumber!)  },
 						set: { newValue in
 							let digitsOnly = newValue.filter { "0123456789".contains($0) }
 							if digitsOnly != "", let intValue = Int(digitsOnly) {
@@ -82,4 +78,3 @@ public struct ServerCredentialsSection: View, SettingsView, Securable {
 		onCommitMethod: {},
 		notificationKey: "ServerSettingsDidChange")
 }
-
