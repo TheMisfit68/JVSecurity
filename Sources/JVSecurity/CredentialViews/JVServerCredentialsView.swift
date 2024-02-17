@@ -8,7 +8,7 @@
 import SwiftUI
 import JVUI
 
-/// A View to enter a server and its port and the usercredentials associated with it
+/// A Form-View to enter a server and its port and the usercredentials associated with it
 /// The view will notifify any subscribers of any changes made
 /// - parameters:keyChainItemName: The name to store all information under in the KeyChain
 /// - parameters:hostName: The hostName to store
@@ -18,7 +18,7 @@ import JVUI
 /// - Parameters:onCommitMethod: A method to be called when the user commits
 /// - Parameters: notificationKey: The key that is used to notify the subscribers through the NotificationCenter
 public struct ServerCredentialsView: View, SettingsView, Securable {
-	
+
 	private let keyChainItemName:String
 
 	@State private var hostName: String
@@ -26,13 +26,16 @@ public struct ServerCredentialsView: View, SettingsView, Securable {
 	@State private var userName: String
 	@State private var password: String
 	
+	let location:String
+	
 	public let notificationKey: String
 	
 	// An explicit public initializer is required to make the view available for other modules
-	public init(keyChainItemName:String, hostName: String, portNumber: Int?, userName: String, password: String, notificationKey: String) {
+	public init(keyChainItemName:String, hostName: String, portNumber: Int?, location:String, userName: String, password: String, notificationKey: String) {
 		self.keyChainItemName = keyChainItemName
 		self._hostName = State(initialValue: hostName)
 		self._portNumber = State(initialValue: portNumber)
+		self.location = location
 		self._userName = State(initialValue: userName)
 		self._password = State(initialValue: password)
 		self.notificationKey = notificationKey
@@ -55,7 +58,7 @@ public struct ServerCredentialsView: View, SettingsView, Securable {
 	
 	private func loadServerCredentials() {
 		
-		if let serverCredentials = serverCredentialsFromKeyChain(name: self.hostName, location: ""){
+		if let serverCredentials = serverCredentialsFromKeyChain(name: self.keyChainItemName, location: self.location){
 			self.hostName = serverCredentials.server
 			self.portNumber = serverCredentials.port
 			self.userName = serverCredentials.account
@@ -66,7 +69,7 @@ public struct ServerCredentialsView: View, SettingsView, Securable {
 	
 	private func storeServerCredentials(){
 		
-		_ = storeServerCredentialsInKeyChain(name: self.hostName, serverAndPort: (self.hostName, self.portNumber), account: self.userName, location: "", password: self.password)
+		_ = storeServerCredentialsInKeyChain(name: self.keyChainItemName, serverAndPort: (self.hostName, self.portNumber), location: self.location, account: self.userName, password: self.password)
 		
 	}
 	
@@ -78,7 +81,27 @@ public struct ServerCredentialsView: View, SettingsView, Securable {
 		keyChainItemName: "PreviewOfServer",
 		hostName: "127.0.0.1",
 		portNumber: 80,
+		location: "",
 		userName: "myUserName",
 		password: "myPassword",
 		notificationKey: "ServerCredentialsDidChange")
+}
+
+
+// MARK: - Add this view to the XCode-library for reuse
+struct LibraryContent: LibraryContentProvider {
+	@LibraryContentBuilder
+	var views: [LibraryItem] {
+		LibraryItem(
+			ServerCredentialsView(
+				keyChainItemName: "PreviewOfServer",
+				hostName: "127.0.0.1",
+				portNumber: 80,
+				location: "",
+				userName: "myUserName",
+				password: "myPassword",
+				notificationKey: "ServerCredentialsDidChange"),
+			category: .layout
+		)
+	}
 }
