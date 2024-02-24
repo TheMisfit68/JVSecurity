@@ -9,6 +9,7 @@
 import Foundation
 import Security
 import OSLog
+import JVSwiftCore
 
 public class KeyChainItem {
 	
